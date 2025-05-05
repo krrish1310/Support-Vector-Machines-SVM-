@@ -1,0 +1,95 @@
+# Breast Cancer SVM Classifier (All-in-One)
+
+# Step 1: Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn.decomposition import PCA
+
+# Step 2: Load and Prepare Data
+df = pd.read_excel("breast-cancer.csv.xls")  # Use your Excel file
+
+# Drop unnecessary columns
+df = df.drop(columns=[col for col in df.columns if 'id' in col.lower() or 'Unnamed' in col])
+
+# Map 'M' (Malignant) to 1, 'B' (Benign) to 0
+df['diagnosis'] = df['diagnosis'].map({'M': 1, 'B': 0})
+
+# Drop missing values if any
+df.dropna(inplace=True)
+
+# Step 3: Feature and Target Split
+X = df.drop('diagnosis', axis=1)
+y = df['diagnosis']
+
+# Step 4: Normalize Features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Step 5: Train/Test Split
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Step 6: SVM (Linear Kernel)
+svm_linear = SVC(kernel='linear')
+svm_linear.fit(X_train, y_train)
+y_pred_linear = svm_linear.predict(X_test)
+print("\n--- Linear SVM Results ---")
+print("Accuracy:", accuracy_score(y_test, y_pred_linear))
+print(classification_report(y_test, y_pred_linear))
+
+# Step 7: SVM (RBF Kernel)
+svm_rbf = SVC(kernel='rbf')
+svm_rbf.fit(X_train, y_train)
+y_pred_rbf = svm_rbf.predict(X_test)
+print("\n--- RBF SVM Results ---")
+print("Accuracy:", accuracy_score(y_test, y_pred_rbf))
+print(classification_report(y_test, y_pred_rbf))
+
+# Step 8: Hyperparameter Tuning (RBF Kernel)
+param_grid = {
+    'C': [0.1, 1, 10, 100],
+    'gamma': [1, 0.1, 0.01, 0.001],
+    'kernel': ['rbf']
+}
+grid = GridSearchCV(SVC(), param_grid, refit=True, verbose=0, cv=5)
+grid.fit(X_train, y_train)
+print("\n--- Best Parameters from GridSearchCV ---")
+print(grid.best_params_)
+
+# Step 9: Evaluation of Best Model
+y_pred_best = grid.predict(X_test)
+print("\n--- Tuned RBF SVM Results ---")
+print("Accuracy:", accuracy_score(y_test, y_pred_best))
+print(confusion_matrix(y_test, y_pred_best))
+print(classification_report(y_test, y_pred_best))
+
+# Step 10: Visualize Decision Boundary with PCA (2D)
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X_scaled)
+X_train_pca, X_test_pca, y_train_pca, y_test_pca = train_test_split(X_pca, y, test_size=0.2, random_state=42)
+
+model_pca = SVC(kernel='rbf', C=grid.best_params_['C'], gamma=grid.best_params_['gamma'])
+model_pca.fit(X_train_pca, y_train_pca)
+
+def plot_svm_decision_boundary(X, y, model):
+    h = .02
+    x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+    y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h), np.arange(y_min, y_max, h))
+    Z = model.predict(np.c_[xx.ravel(), yy.ravel()])
+    Z = Z.reshape(xx.shape)
+    plt.figure(figsize=(10,6))
+    plt.contourf(xx, yy, Z, cmap=plt.cm.coolwarm, alpha=0.8)
+    sns.scatterplot(x=X[:, 0], y=X[:, 1], hue=y, palette='coolwarm', edgecolor='k')
+    plt.title("SVM Decision Boundary (RBF Kernel, PCA Reduced)")
+    plt.xlabel("PCA Component 1")
+    plt.ylabel("PCA Component 2")
+    plt.show()
+
+plot_svm_decision_boundary(X_test_pca, y_test_pca, model_pca)
