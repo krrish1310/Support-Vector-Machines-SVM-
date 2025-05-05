@@ -1,35 +1,20 @@
-# Task 7: Support Vector Machines (SVM)
+# Task 7 - Breast Cancer Classification using SVM
 
-## 📌 Objective
-Use Support Vector Machines for both linear and non-linear classification using the Breast Cancer dataset.
+This notebook uses the Breast Cancer Wisconsin dataset for binary classification of tumors as malignant or benign using Support Vector Machines.
 
-## 📁 Files Included
-- `Task_7_SVM.ipynb` – Jupyter Notebook with all steps implemented
-- `breast-cancer.csv.xls` – Dataset used
-- `README.md` – This file
+## Steps Performed:
+1. Data loading and preprocessing
+2. Label encoding ('M' = 1, 'B' = 0)
+3. Feature scaling using StandardScaler
+4. Train/test split (80/20)
+5. SVM training with Linear and RBF kernels
+6. Model evaluation using accuracy, confusion matrix, and classification report
+7. Hyperparameter tuning using GridSearchCV
+8. PCA-based visualization of decision boundary (2D)
 
-## 🛠 Tools Used
-- Python
-- Jupyter Notebook
-- Libraries: scikit-learn, matplotlib, seaborn, pandas, numpy
-
-## ✅ Steps Performed
-1. Loaded and cleaned the breast cancer dataset.
-2. Scaled features using `StandardScaler`.
-3. Trained SVM with linear and RBF kernels.
-4. Evaluated model performance with accuracy, confusion matrix, and classification report.
-5. Tuned hyperparameters `C` and `gamma` using `GridSearchCV`.
-6. Visualized the decision boundary in 2D using PCA.
-
-## 🧠 Key Concepts Learned
-- Margin maximization in SVM
-- Kernel trick (Linear vs. RBF)
-- Model tuning via grid search
-- Visualization of high-dimensional data in 2D
-
-## 📊 Results
-- Achieved high classification accuracy with RBF kernel after tuning.
-- Visualized how SVM separates classes in reduced dimension space.
-
-## 🚀 Submission
-Submit your GitHub repo link [here](https://forms.gle/8Gm83s53KbyXs3Ne9)
+## Requirements:
+- pandas
+- numpy
+- matplotlib
+- seaborn
+- scikit-learn
